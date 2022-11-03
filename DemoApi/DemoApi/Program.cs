@@ -75,6 +75,16 @@ app.MapGet("/chaos", () =>
     return "This is fine.";
 }).WithName("chaos");
 
+app.MapGet("/timeout", () =>
+{
+    Random random = new Random();
+    var timeoutInSeconds = random.Next(10, 30);
+
+    Thread.Sleep(timeoutInSeconds * 1000);
+
+    return $"This is fine. Timeout was {timeoutInSeconds} seconds.";
+}).WithName("timeoutornot");
+
 app.MapHealthChecks("/healthz");
 
 app.Run();
