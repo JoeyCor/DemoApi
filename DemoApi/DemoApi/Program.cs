@@ -1,3 +1,4 @@
+using DemoApi.HealthChecks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -8,14 +9,19 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
+
+builder.Services.AddHealthChecks()
+    .AddCheck<WorkingHealthCheck>("WorkingHealthCheck")
+    .AddCheck<ChaosHealthCheck>("ChaosHealthCheck");
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+app.UseSwagger();
+app.UseSwaggerUI();
 //}
 
 //app.UseHttpsRedirection();
@@ -39,7 +45,7 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast");
 
-app.MapGet("/hostinfo", () => 
+app.MapGet("/hostinfo", () =>
 {
     var hostName = Dns.GetHostName();
     var ipAddresses = Dns.GetHostAddresses(hostName).Select(i => i.ToString());
@@ -47,11 +53,29 @@ app.MapGet("/hostinfo", () =>
 })
 .WithName("GetHostInfo");
 
-app.MapGet("/health", () => 
+app.MapGet("/healthy", () =>
 {
-    return "Up and running.";
-})
-.WithName("Health");
+    return "this is fine";
+}).WithName("healthy");
+
+app.MapGet("/faulty", () =>
+{
+    throw new Exception("This is not fine");
+}).WithName("faulty");
+
+app.MapGet("/chaos", () =>
+{
+    Random random = new Random();
+
+    if (random.Next(0, 100) <= 80)
+    {
+        throw new Exception("This is not fine");
+    }
+
+    return "This is fine.";
+}).WithName("chaos");
+
+app.MapHealthChecks("/healthz");
 
 app.Run();
 
