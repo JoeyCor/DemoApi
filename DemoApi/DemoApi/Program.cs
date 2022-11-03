@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,6 +46,12 @@ app.MapGet("/hostinfo", () =>
     return new HostInfo(hostName, string.Join(',', ipAddresses));
 })
 .WithName("GetHostInfo");
+
+app.MapGet("/health", () => 
+{
+    return "Up and running.";
+})
+.WithName("Health");
 
 app.Run();
 
