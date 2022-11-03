@@ -1,6 +1,4 @@
 using DemoApi.HealthChecks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -84,6 +82,11 @@ app.MapGet("/timeout", () =>
 
     return $"This is fine. Timeout was {timeoutInSeconds} seconds.";
 }).WithName("timeoutornot");
+
+app.MapGet("/helloworld", () =>
+{
+    return "Hello world! v1";
+}).WithName("helloworld");
 
 app.MapHealthChecks("/healthz");
 
